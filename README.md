@@ -7,6 +7,8 @@ Installation
 
 The preferred way to install this extension is through [composer](http://getcomposer.org/download/).
 
+![Sample](https://github.com/MatthewPattell/yii2-working-date-time-widget/blob/master/sample.png?raw=true "Example screenshot")
+
 Either run
 
 ```
