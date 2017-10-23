@@ -25,7 +25,8 @@ to the require section of your `composer.json` file.
 Usage
 -----
 
-Once the extension is installed, simply use it in your code by  :
+Once the extension is installed, simply use it in your code by:
 
 ```php
-<?= \MP\WorkingDatetime\AutoloadExample::widget(); ?>```
+<?= \MP\WorkingDatetime\WorkingDays::widget(['name' => 'example']); ?>
+```

@@ -1,35 +1,54 @@
 <?php
 /**
- * @copyright Copyright (c) 2013-15 2amigOS! Consulting Group LLC
- * @link http://2amigos.us
- * @license http://www.opensource.org/licenses/bsd-license.php New BSD License
+ * Created by PhpStorm.
+ * User: Yarmaliuk Mikhail
+ * Date: 20.10.2017
+ * Time: 17:00
  */
-namespace dosamigos\ckeditor;
+
+namespace MP\WorkingDatetime;
 
 use yii\web\AssetBundle;
+use yii\widgets\MaskedInputAsset;
 
 /**
- * CKEditorAsset
- *
- * @author Antonio Ramirez <amigo.cobos@gmail.com>
- * @link http://www.ramirezcobos.com/
- * @link http://www.2amigos.us/
+ * Class    WorkingDaysAsset
  * @package dosamigos\ckeditor
+ * @author  Yarmaliuk Mikhail
+ * @version 1.0
  */
-class CKEditorAsset extends AssetBundle
+class WorkingDaysAsset extends AssetBundle
 {
-    public $js = [
-        'ckeditor.js',
-        'adapters/jquery.js'
-    ];
-    public $depends = [
-        'yii\web\YiiAsset',
-        'yii\web\JqueryAsset'
+    /**
+     * @var array
+     */
+    public $css = [
+        'working-days.css',
     ];
 
+    /**
+     * @var array
+     */
+    public $js = [
+        'working-days.js',
+    ];
+
+    /**
+     * @var array
+     */
+    public $depends = [
+        'yii\web\JqueryAsset',
+        'yii\widgets\MaskedInputAsset',
+    ];
+
+    /**
+     * @inheritdoc
+     * @return void
+     */
     public function init()
     {
-        $this->sourcePath = __DIR__ . '/assets/ckeditor';
+        $this->sourcePath = __DIR__ . '/assets';
+
         parent::init();
     }
 }

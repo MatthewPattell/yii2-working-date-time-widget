@@ -1,6 +1,6 @@
 {
     "name": "matthew-p/yii2-working-date-time-widget",
-    "description": "Input day/time/dinner widget",
+    "description": "Working day and time input widget for yii2.",
     "type": "yii2-extension",
     "keywords": ["yii2","extension","widget","datetime","working","day","dinner","time"],
     "license": "BSD-3-Clause",
