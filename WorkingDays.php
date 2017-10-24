@@ -123,6 +123,6 @@ class WorkingDays extends InputWidget
             'fullDay' => self::FULL_DAY,
         ];
 
-        $this->view->registerJs("$('#{$this->options['id']}').WorkingDays(" . Json::encode($options) . ");");
+        $this->view->registerJs("MPWorkingDays.init(" . Json::encode($options) . ");");
     }
 }

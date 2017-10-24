@@ -1,47 +1,31 @@
 /**
  * Created by Yarmaliuk Mikhail on 23.10.2017.
+ *
+ * @module MPWorkingDays
  */
 
-(function( $ ){
+/**
+ * MPWorkingDays module
+ *
+ * @author Yarmaliuk Mikhail
+ *
+ * @param {MPWorkingDays||Object} app
+ * @param {jQuery} $
+ */
+var MPWorkingDays = (function (app, $) {
 
     let settings = {};
+    let body = $('body');
 
-    let methods = {
-        init : function(options) {
-
-            settings = $.extend(settings, options);
-
-            let self = $(this);
-
-            self.find('.time-work, .time-dinner')
-                .inputmask('09.19 - 09.19', {
-                    placeholder: "00.00 - 00.00",
-                    definitions: {
-                        '0': {
-                            validator: "[0-2]",
-                            cardinality: 1
-                        },
-                        '1' : {
-                            validator: "[0-5]",
-                            cardinality: 1
-                        }
-                    }
-                })
-                .bind('keyup.WorkingDays', function(e) {
-                    if ( (e.keyCode >= 48 && e.keyCode <= 57) || (e.keyCode >= 96 && e.keyCode <= 105) || e.keyCode === 8 || e.keyCode === 13 || e.ctrlKey ) {
-                        _setValue($(this).closest('.option'));
-                    }
-                });
-
-            self.find('div.option').bind('click.WorkingDays', function(e) {
-                if(e.target.nodeName === 'DIV') {
-                    _setValue($(this), true);
-                }
-            });
-        },
-    };
-
-    let _setValue = function (option, toggle) {
+    /**
+     * Set input value
+     *
+     * @param {jQuery} option
+     * @param {bool} toggle
+     *
+     * @return {undefined}
+     */
+    app.setInputValue = function (option, toggle) {
         let status = option.hasClass('active'),
             inputW = option.find('input.time-work'),
             inputD = option.find('input.time-dinner');
@@ -84,21 +68,68 @@
             inputW.add(inputD)
                 .removeClass('active')
                 .addClass('inactive');
-
-            return;
         }
     };
 
-    $.fn.WorkingDays = function( method ) {
+    /**
+     * Re Init module
+     *
+     * @return {undefined}
+     */
+    app.reInit = function () {
 
-        if ( methods[method] ) {
-            return methods[method].apply( this, Array.prototype.slice.call( arguments, 1 ));
-        } else if ( typeof method === 'object' || ! method ) {
-            return methods.init.apply( this, arguments );
-        } else {
-            $.error( 'Метод с именем ' +  method + ' не существует для jQuery.WorkingDays' );
-        }
+        let maskedInputs = body.find('.time-work, .time-dinner');
 
+        // Remove inputmask
+        maskedInputs.inputmask('remove');
+
+        // Attach inputmask plugin
+        maskedInputs.inputmask('09.19 - 09.19', {
+                placeholder: "00.00 - 00.00",
+                definitions: {
+                    '0': {
+                        validator: "[0-2]",
+                        cardinality: 1
+                    },
+                    '1': {
+                        validator: "[0-5]",
+                        cardinality: 1
+                    }
+                }
+            });
+
+        // Detach triggers
+        body.off('.MPWorkingDays');
+
+        // Attach keyup event
+        body.on('keyup.MPWorkingDays', '.time-work, .time-dinner', function (e) {
+            if ((e.keyCode >= 48 && e.keyCode <= 57) || (e.keyCode >= 96 && e.keyCode <= 105) || e.keyCode === 8 || e.keyCode === 13 || e.ctrlKey) {
+                app.setInputValue($(this).closest('.option'));
+            }
+        });
+
+        // Attach click event
+        body.on('click.MPWorkingDays', '.working-days div.option', function (e) {
+            if (e.target.nodeName === 'DIV') {
+                app.setInputValue($(this), true);
+            }
+        });
     };
 
-})( jQuery );
+    /**
+     * Init MPWorkingDays module
+     *
+     * @param {Object} options
+     *
+     * @return {undefined}
+     */
+    app.init = function (options) {
+
+        settings = $.extend(settings, options);
+
+        app.reInit();
+    };
+
+    return app;
+
+}(MPWorkingDays || {}, jQuery));
