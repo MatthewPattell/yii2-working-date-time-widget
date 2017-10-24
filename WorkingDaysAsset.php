@@ -9,7 +9,6 @@
 namespace MP\WorkingDateTime;
 
 use yii\web\AssetBundle;
-use yii\widgets\MaskedInputAsset;
 
 /**
  * Class    WorkingDaysAsset
