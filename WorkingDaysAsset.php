@@ -6,14 +6,14 @@
  * Time: 17:00
  */
 
-namespace MP\WorkingDatetime;
+namespace MP\WorkingDateTime;
 
 use yii\web\AssetBundle;
 use yii\widgets\MaskedInputAsset;
 
 /**
  * Class    WorkingDaysAsset
- * @package dosamigos\ckeditor
+ * @package MP\WorkingDateTime
  * @author  Yarmaliuk Mikhail
  * @version 1.0
  */

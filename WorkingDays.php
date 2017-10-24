@@ -6,7 +6,7 @@
  * Time: 17:00
  */
 
-namespace MP\WorkingDatetime;
+namespace MP\WorkingDateTime;
 
 use Yii;
 use yii\helpers\Html;
@@ -15,7 +15,7 @@ use yii\widgets\InputWidget;
 
 /**
  * Class    WorkingDays
- * @package MP\WorkingDatetime
+ * @package MP\WorkingDateTime
  * @author  Yarmaliuk Mikhail
  * @version 1.0
  */
