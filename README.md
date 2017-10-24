@@ -32,3 +32,8 @@ Once the extension is installed, simply use it in your code by:
 ```php
 <?= \MP\WorkingDatetime\WorkingDays::widget(['name' => 'example']); ?>
 ```
+
+If you dynamic add widget to page, run (js):
+```js
+MPWorkingDays.reInit();
+```
