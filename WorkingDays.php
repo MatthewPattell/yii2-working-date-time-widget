@@ -11,6 +11,7 @@ namespace MP\WorkingDateTime;
 use Yii;
 use yii\helpers\Html;
 use yii\helpers\Json;
+use yii\web\View;
 use yii\widgets\InputWidget;
 
 /**
@@ -22,6 +23,13 @@ use yii\widgets\InputWidget;
 class WorkingDays extends InputWidget
 {
     const FULL_DAY = '00.00 - 00.00';
+
+    /**
+     * Enable dinner input
+     *
+     * @var bool
+     */
+    public $enableDinner = true;
 
     /**
      * @var string|array
@@ -65,23 +73,28 @@ class WorkingDays extends InputWidget
 
         foreach ($this->getDays() as $dayAlias => $dayTitle) {
             $val1       = !empty($this->value[$dayAlias]['work']) && $this->value[$dayAlias]['work'] !== self::FULL_DAY ? $this->value[$dayAlias]['work'] : NULL;
-            $val2       = !empty($this->value[$dayAlias]['dinner']) && $this->value[$dayAlias]['dinner'] !== self::FULL_DAY ? $this->value[$dayAlias]['dinner'] : NULL;
             $day_status = empty($this->value[$dayAlias]['work']) && empty($this->value[$dayAlias]['dinner']) ? 'inactive' : 'active';
-
-            $work_input_status   = $val1 ? 'active' : 'inactive';
-            $dinner_input_status = $val2 ? 'active' : 'inactive';
 
             $input .= Html::beginTag('div', ['class' => 'option ' . $day_status]);
             $input .= Html::beginTag('div', ['class' => 'option-row']);
 
             $input .= Html::tag('div', $dayTitle, ['class' => 'name', 'title' => Yii::t('app', 'Нажмите, чтобы активировать')]);
             $input .= Html::beginTag('div', ['class' => 'value']);
+
             // Masked input
-            $input .= Html::textInput(NULL, $val1, ['class' => 'form-control time-work ' . $work_input_status, 'placeholder' => Yii::t('app', 'Раб.: круглосуточно')]);
-            $input .= Html::textInput($inputName . '[' . $dayAlias . '][dinner]', $val2, ['class' => 'form-control time-dinner ' . $dinner_input_status, 'placeholder' => Yii::t('app', 'Обед: без обеда')]);
+            $input .= Html::textInput(NULL, $val1, ['class' => 'form-control time-work ' . ($val1 ? 'active' : 'inactive'), 'placeholder' => Yii::t('app', 'Раб.: круглосуточно')]);
             // Real input
             $input .= Html::textInput($inputName . '[' . $dayAlias . '][work]', !empty($this->value[$dayAlias]['work']) ? $this->value[$dayAlias]['work'] : NULL, ['class' => 'hide realW']);
-            $input .= Html::textInput($inputName . '[' . $dayAlias . '][dinner]', !empty($this->value[$dayAlias]['dinner']) ? $this->value[$dayAlias]['dinner'] : NULL, ['class' => 'hide realD']);
+
+            if ($this->enableDinner) {
+                $val2 = !empty($this->value[$dayAlias]['dinner']) && $this->value[$dayAlias]['dinner'] !== self::FULL_DAY ? $this->value[$dayAlias]['dinner'] : NULL;
+
+                // Masked input
+                $input .= Html::textInput($inputName . '[' . $dayAlias . '][dinner]', $val2, ['class' => 'form-control time-dinner ' . ($val2 ? 'active' : 'inactive'), 'placeholder' => Yii::t('app', 'Обед: без обеда')]);
+                // Real input
+                $input .= Html::textInput($inputName . '[' . $dayAlias . '][dinner]', !empty($this->value[$dayAlias]['dinner']) ? $this->value[$dayAlias]['dinner'] : NULL, ['class' => 'hide realD']);
+            }
+
             $input .= Html::endTag('div');
             $input .= Html::endTag('div');
             $input .= Html::endTag('div');
@@ -120,9 +133,11 @@ class WorkingDays extends InputWidget
         WorkingDaysAsset::register($this->view);
 
         $options = [
-            'fullDay' => self::FULL_DAY,
+            'fullDay'      => self::FULL_DAY,
+            'enableDinner' => $this->enableDinner,
         ];
 
-        $this->view->registerJs("MPWorkingDays.init(" . Json::encode($options) . ");");
+        $this->view->registerJs("MPWorkingDays.init();", View::POS_READY, 'MPWorkingDays');
+        $this->view->registerJs("MPWorkingDays.addInputSettings('{$this->options['id']}', " . Json::encode($options) . ")");
     }
 }

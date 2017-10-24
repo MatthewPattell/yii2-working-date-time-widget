@@ -14,7 +14,29 @@
  */
 var MPWorkingDays = (function (app, $) {
 
-    let settings = {};
+    /**
+     * Add personal input settings
+     *
+     * @param {string} id
+     * @param {Object} settings
+     *
+     * @return {undefined}
+     */
+    app.addInputSettings = function (id, settings) {
+        $('#' + id).data('MPWorkingDaysSettings', settings);
+    };
+
+    /**
+     * Get input setting
+     *
+     * @param {jQuery} element
+     * @param {string} settingName
+     *
+     * @return {null|string|bool}
+     */
+    let getInputSetting = function (element, settingName) {
+        return element.data('MPWorkingDaysSettings')[settingName] !== undefined ? element.data('MPWorkingDaysSettings')[settingName] : null;
+    };
 
     /**
      * Set input value
@@ -25,14 +47,20 @@ var MPWorkingDays = (function (app, $) {
      * @return {undefined}
      */
     app.setInputValue = function (option, toggle) {
-        let status = option.hasClass('active'),
-            inputW = option.find('input.time-work'),
-            inputD = option.find('input.time-dinner')
-            realInputW = option.find('.realW')
-            realInputD = option.find('.realD');
+        let widget = option.closest('.working-days')
+            status = option.hasClass('active');
+
+        let fullDay = getInputSetting(widget, 'fullDays'),
+            enableDinner = getInputSetting(widget, 'enableDinner');
+
+        let inputW = option.find('input.time-work'),
+            realInputW = option.find('.realW');
+
+        let inputD = enableDinner ? option.find('input.time-dinner') : null,
+            realInputD = enableDinner ? option.find('.realD') : null;
 
         if (toggle !== true) {
-            if (!inputW.val().length && !inputD.val().length) {
+            if (!inputW.val().length && (!inputD || !inputD.val().length)) {
                 option.add(inputW).add(inputD)
                     .addClass('inactive')
                     .removeClass('active');
@@ -45,19 +73,26 @@ var MPWorkingDays = (function (app, $) {
                     .removeClass(!inputW.val().length ? 'active' : 'inactive')
                     .addClass(inputW.val().length ? 'active' : 'inactive');
 
-                inputD
-                    .removeClass(!inputD.val().length ? 'active' : 'inactive')
-                    .addClass(inputD.val().length ? 'active' : 'inactive');
-
+                if (enableDinner) {
+                    inputD
+                        .removeClass(!inputD.val().length ? 'active' : 'inactive')
+                        .addClass(inputD.val().length ? 'active' : 'inactive');
+                }
             }
 
             realInputW.val(inputW.val());
-            realInputD.val(inputD.val());
+
+            if (enableDinner) {
+                realInputD.val(inputD.val());
+            }
         } else {
             inputW.val(null);
-            inputD.val(null);
-            realInputW.val(status === true ? null : settings.fullDay);
-            realInputD.val(status === true ? null : settings.fullDay);
+            realInputW.val(status === true ? null : fullDay);
+
+            if (enableDinner) {
+                inputD.val(null);
+                realInputD.val(status === true ? null : fullDay);
+            }
 
             option
                 .toggleClass('inactive')
@@ -130,9 +165,6 @@ var MPWorkingDays = (function (app, $) {
      * @return {undefined}
      */
     app.init = function (options) {
-
-        settings = $.extend(settings, options);
-
         app.reInit();
     };
 
