@@ -38,10 +38,10 @@ class WorkingDays extends InputWidget
             $this->options['id'] = $this->getId();
         }
 
-        $values = $this->hasModel() ? Html::getAttributeValue($this->model, $this->attribute) : $this->value;
+        $this->value = $this->hasModel() ? Html::getAttributeValue($this->model, $this->attribute) : $this->value;
 
-        if (is_string($values)) {
-            $this->value = json_decode($values, true);
+        if (is_string($this->value)) {
+            $this->value = json_decode($this->value, true);
         }
     }
 
