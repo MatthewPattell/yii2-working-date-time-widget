@@ -15,7 +15,6 @@
 var MPWorkingDays = (function (app, $) {
 
     let settings = {};
-    let body = $('body');
 
     /**
      * Set input value
@@ -28,9 +27,8 @@ var MPWorkingDays = (function (app, $) {
     app.setInputValue = function (option, toggle) {
         let status = option.hasClass('active'),
             inputW = option.find('input.time-work'),
-            inputD = option.find('input.time-dinner');
-
-        let realInputW = option.find('.realW'),
+            inputD = option.find('input.time-dinner')
+            realInputW = option.find('.realW')
             realInputD = option.find('.realD');
 
         if (toggle !== true) {
@@ -78,13 +76,16 @@ var MPWorkingDays = (function (app, $) {
      */
     app.reInit = function () {
 
-        let maskedInputs = body.find('.time-work, .time-dinner');
+        let dayInputs = $('.time-work, .time-dinner');
 
-        // Remove inputmask
-        maskedInputs.inputmask('remove');
+        $.each(dayInputs, function (i, el) {
+            let timeInput = $(el);
 
-        // Attach inputmask plugin
-        maskedInputs.inputmask('09.19 - 09.19', {
+            // Remove inputmask
+            timeInput.inputmask('remove');
+
+            // Attach inputmask plugin
+            timeInput.inputmask('09.19 - 09.19', {
                 placeholder: "00.00 - 00.00",
                 definitions: {
                     '0': {
@@ -98,20 +99,25 @@ var MPWorkingDays = (function (app, $) {
                 }
             });
 
-        // Detach triggers
-        body.off('.MPWorkingDays');
+            // Attach keyup event
+            timeInput
+                .off('.MPWorkingDays')
+                .on('keyup.MPWorkingDays', function (e) {
+                    if ((e.keyCode >= 46 && e.keyCode <= 57) || (e.keyCode >= 96 && e.keyCode <= 105) || e.keyCode === 8 || e.keyCode === 13 || e.ctrlKey) {
+                        app.setInputValue($(this).closest('.option'));
+                    }
+                });
 
-        // Attach keyup event
-        body.on('keyup.MPWorkingDays', '.time-work, .time-dinner', function (e) {
-            if ((e.keyCode >= 48 && e.keyCode <= 57) || (e.keyCode >= 96 && e.keyCode <= 105) || e.keyCode === 8 || e.keyCode === 13 || e.ctrlKey) {
-                app.setInputValue($(this).closest('.option'));
-            }
-        });
-
-        // Attach click event
-        body.on('click.MPWorkingDays', '.working-days div.option', function (e) {
-            if (e.target.nodeName === 'DIV') {
-                app.setInputValue($(this), true);
+            // Attach click event
+            if (timeInput.hasClass('time-work')) {
+                timeInput
+                    .closest('div.option')
+                    .off('.MPWorkingDays')
+                    .on('click.MPWorkingDays', function (e) {
+                        if (e.target.nodeName === 'DIV') {
+                            app.setInputValue($(this), true);
+                        }
+                    });
             }
         });
     };
