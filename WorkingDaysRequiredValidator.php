@@ -84,7 +84,6 @@ class WorkingDaysRequiredValidator extends Validator
     {
         $options = [];
 
-        $options['inputName']       = Html::getInputName($model, $attribute);
         $options['requiredMessage'] = $this->formatMessage($this->message, [
             'attribute' => $model->getAttributeLabel($attribute),
         ]);

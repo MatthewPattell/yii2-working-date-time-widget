@@ -182,7 +182,7 @@ class WorkingDays extends InputWidget
         // Real input
         $input .= Html::textInput($inputName . '[' . $dayAlias . '][work]', !empty($this->value[$dayAlias]['work']) ? $this->value[$dayAlias]['work'] : NULL, [
             'class' => 'hide realW',
-            'id' => $this->hasModel() && $dayAlias === 'monday' ? Html::getInputId($this->model, $this->attribute) : NULL,
+            'id'    => $this->hasModel() && $dayAlias === 'monday' ? Html::getInputId($this->model, $this->attribute) : NULL,
         ]);
 
         return $input;

@@ -334,7 +334,7 @@ var MPWorkingDays = (function (app, $) {
  * @author Yarmaliuk Mikhail
  */
 yii.validation.requiredWorkingDays = function (attribute, messages, options) {
-    let widget = $('input[name^="' + options.inputName + '"]').closest('.working-days');
+    let widget = $(attribute.input).closest('.working-days');
 
     let isEmpty = widget.find('.realW, .realD').filter(function () {
         return !!this.value;
