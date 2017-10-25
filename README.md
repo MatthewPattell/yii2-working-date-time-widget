@@ -64,3 +64,16 @@ Set dynamicaly widget settings:
 ```js
 MPWorkingDays.addInputSettings(widgetID, {settings...});
 ```
+
+**Yii2 Model Required Validator:**
+```php
+/**
+ * @inheritdoc
+ */
+public function rules()
+{
+    return [
+        ['workday', WorkingDaysRequiredValidator::class]
+    ];
+}
+```

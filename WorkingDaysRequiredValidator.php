@@ -14,26 +14,19 @@ use yii\validators\ValidationAsset;
 use yii\validators\Validator;
 
 /**
- * Class    WorkingDaysValidator
+ * Class    WorkingDaysRequiredValidator
  * @package MP\WorkingDateTime
  * @author  Yarmaliuk Mikhail
  * @version 1.0
  */
-class WorkingDaysValidator extends Validator
+class WorkingDaysRequiredValidator extends Validator
 {
-    /**
-     * Required field
-     *
-     * @var bool
-     */
-    public $required = true;
-
     /**
      * Reuired error message
      *
      * @var string
      */
-    public $requiredMessage = NULL;
+    public $message = NULL;
 
     /**
      * @inheritdoc
@@ -42,8 +35,8 @@ class WorkingDaysValidator extends Validator
     {
         parent::init();
 
-        if ($this->requiredMessage === NULL) {
-            $this->requiredMessage = Yii::t('yii', '{attribute} cannot be blank.');
+        if ($this->message === NULL) {
+            $this->message = Yii::t('yii', '{attribute} cannot be blank.');
         }
     }
 
@@ -52,7 +45,7 @@ class WorkingDaysValidator extends Validator
      */
     protected function validateValue($value)
     {
-        if ($this->required && is_array($value)) {
+        if (is_array($value)) {
             $empty = true;
 
             foreach ($value as $dayAlias => $workTimes) {
@@ -63,8 +56,10 @@ class WorkingDaysValidator extends Validator
             }
 
             if ($empty) {
-                return [$this->requiredMessage, []];
+                return [$this->message, []];
             }
+        } else {
+            return [$this->message, []];
         }
 
         return NULL;
@@ -77,14 +72,9 @@ class WorkingDaysValidator extends Validator
     {
         ValidationAsset::register($view);
 
-        $options         = $this->getClientOptions($model, $attribute);
-        $clientValidator = 'yii.validation.requiredWorkingDays(attribute, messages, ' . json_encode($options, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . ');';
+        $options = $this->getClientOptions($model, $attribute);
 
-        if ($this->required) {
-            return $clientValidator;
-        }
-
-        return NULL;
+        return 'yii.validation.requiredWorkingDays(attribute, messages, ' . json_encode($options, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . ');';
     }
 
     /**
@@ -95,7 +85,7 @@ class WorkingDaysValidator extends Validator
         $options = [];
 
         $options['inputName']       = Html::getInputName($model, $attribute);
-        $options['requiredMessage'] = $this->formatMessage($this->requiredMessage, [
+        $options['requiredMessage'] = $this->formatMessage($this->message, [
             'attribute' => $model->getAttributeLabel($attribute),
         ]);
 
