@@ -9,7 +9,6 @@
 namespace MP\WorkingDateTime;
 
 use Yii;
-use yii\helpers\Html;
 use yii\validators\ValidationAsset;
 use yii\validators\Validator;
 
@@ -29,6 +28,13 @@ class WorkingDaysRequiredValidator extends Validator
     public $message = NULL;
 
     /**
+     * Validate array attribute
+     *
+     * @var bool
+     */
+    public $each = false;
+
+    /**
      * @inheritdoc
      */
     public function init()
@@ -37,6 +43,27 @@ class WorkingDaysRequiredValidator extends Validator
 
         if ($this->message === NULL) {
             $this->message = Yii::t('yii', '{attribute} cannot be blank.');
+        }
+    }
+
+    /**
+     * @inheritdoc
+     *
+     * Implement each validation
+     */
+    public function validateAttribute($model, $attribute)
+    {
+        if ($this->each) {
+            foreach ($model->$attribute as $i => $value) {
+
+                $result = $this->validateValue($value);
+
+                if (!empty($result)) {
+                    $model->addError($attribute."[$i]", $this->formatMessage($this->message, []));
+                }
+            }
+        } else {
+            parent::validateAttribute($model, $attribute);
         }
     }
 
