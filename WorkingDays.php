@@ -111,10 +111,6 @@ class WorkingDays extends InputWidget
             $input .= Html::endTag('div');
         }
 
-        if ($this->hasModel()) {
-            $input .= Html::tag('span', NULL, ['id' => Html::getInputId($this->model, $this->attribute)]);
-        }
-
         $input = Html::tag('div', $input, ['id' => $this->options['id'], 'class' => 'working-days']);
 
         return $input;
@@ -184,7 +180,10 @@ class WorkingDays extends InputWidget
         ]);
 
         // Real input
-        $input .= Html::textInput($inputName . '[' . $dayAlias . '][work]', !empty($this->value[$dayAlias]['work']) ? $this->value[$dayAlias]['work'] : NULL, ['class' => 'hide realW']);
+        $input .= Html::textInput($inputName . '[' . $dayAlias . '][work]', !empty($this->value[$dayAlias]['work']) ? $this->value[$dayAlias]['work'] : NULL, [
+            'class' => 'hide realW',
+            'id' => $this->hasModel() && $dayAlias === 'monday' ? Html::getInputId($this->model, $this->attribute) : NULL,
+        ]);
 
         return $input;
     }
