@@ -22,7 +22,12 @@ use yii\widgets\InputWidget;
  */
 class WorkingDays extends InputWidget
 {
-    const FULL_DAY = '00.00 - 00.00';
+    /**
+     * Round-the-clock value
+     *
+     * @var string
+     */
+    public $roundTheClock = '00.00 - 00.00';
 
     /**
      * Enable dinner input
@@ -30,6 +35,19 @@ class WorkingDays extends InputWidget
      * @var bool
      */
     public $enableDinner = true;
+
+    /**
+     * Automatic filling of time
+     *
+     * Example:
+     * [1,2,5] // Automatic filling of time for 1,2,5 days
+     * or
+     * ['monday', 'friday']
+     * !FILLS TIME FROM THE FILLED DAY!
+     *
+     * @var array
+     */
+    public $autocompleteDays = [];
 
     /**
      * @var string|array
@@ -54,8 +72,6 @@ class WorkingDays extends InputWidget
     }
 
     /**
-     * Get input
-     *
      * @inheritdoc
      * @return string
      */
@@ -69,11 +85,14 @@ class WorkingDays extends InputWidget
             $inputName = $this->name;
         }
 
+        $days = $this->getDays();
+
         $input = Html::beginTag('div', ['id' => $this->options['id'], 'class' => 'working-days']);
 
-        foreach ($this->getDays() as $dayAlias => $dayTitle) {
-            $val1       = !empty($this->value[$dayAlias]['work']) && $this->value[$dayAlias]['work'] !== self::FULL_DAY ? $this->value[$dayAlias]['work'] : NULL;
-            $day_status = empty($this->value[$dayAlias]['work']) && empty($this->value[$dayAlias]['dinner']) ? 'inactive' : 'active';
+        foreach ($days as $dayAlias => $dayTitle) {
+            $val1         = !empty($this->value[$dayAlias]['work']) && $this->value[$dayAlias]['work'] !== $this->roundTheClock ? $this->value[$dayAlias]['work'] : NULL;
+            $val1Autofill = (!empty($this->autocompleteDays[$dayAlias]) || in_array(array_search($dayAlias, array_keys($days)) + 1, $this->autocompleteDays)) ? ($this->isEmptyTimeDays('dinner') ? 1 : -1) : 0;
+            $day_status   = empty($this->value[$dayAlias]['work']) && empty($this->value[$dayAlias]['dinner']) ? 'inactive' : 'active';
 
             $input .= Html::beginTag('div', ['class' => 'option ' . $day_status]);
             $input .= Html::beginTag('div', ['class' => 'option-row']);
@@ -82,15 +101,16 @@ class WorkingDays extends InputWidget
             $input .= Html::beginTag('div', ['class' => 'value']);
 
             // Masked input
-            $input .= Html::textInput(NULL, $val1, ['class' => 'form-control time-work ' . ($val1 ? 'active' : 'inactive'), 'placeholder' => Yii::t('app', 'Раб.: круглосуточно')]);
+            $input .= Html::textInput(NULL, $val1, ['class' => 'form-control time-work ' . ($val1 ? 'active' : 'inactive'), 'placeholder' => Yii::t('app', 'Раб.: круглосуточно'), 'data-autofill' => $val1Autofill]);
             // Real input
             $input .= Html::textInput($inputName . '[' . $dayAlias . '][work]', !empty($this->value[$dayAlias]['work']) ? $this->value[$dayAlias]['work'] : NULL, ['class' => 'hide realW']);
 
             if ($this->enableDinner) {
-                $val2 = !empty($this->value[$dayAlias]['dinner']) && $this->value[$dayAlias]['dinner'] !== self::FULL_DAY ? $this->value[$dayAlias]['dinner'] : NULL;
+                $val2         = !empty($this->value[$dayAlias]['dinner']) && $this->value[$dayAlias]['dinner'] !== $this->roundTheClock ? $this->value[$dayAlias]['dinner'] : NULL;
+                $val2Autofill = (!empty($this->autocompleteDays[$dayAlias]) || in_array(array_search($dayAlias, array_keys($days)) + 1, $this->autocompleteDays)) ? ($this->isEmptyTimeDays('dinner') ? 1 : -1) : 0;
 
                 // Masked input
-                $input .= Html::textInput($inputName . '[' . $dayAlias . '][dinner]', $val2, ['class' => 'form-control time-dinner ' . ($val2 ? 'active' : 'inactive'), 'placeholder' => Yii::t('app', 'Обед: без обеда')]);
+                $input .= Html::textInput($inputName . '[' . $dayAlias . '][dinner]', $val2, ['class' => 'form-control time-dinner ' . ($val2 ? 'active' : 'inactive'), 'placeholder' => Yii::t('app', 'Обед: без обеда'), 'data-autofill' => $val2Autofill]);
                 // Real input
                 $input .= Html::textInput($inputName . '[' . $dayAlias . '][dinner]', !empty($this->value[$dayAlias]['dinner']) ? $this->value[$dayAlias]['dinner'] : NULL, ['class' => 'hide realD']);
             }
@@ -124,6 +144,26 @@ class WorkingDays extends InputWidget
     }
 
     /**
+     * If empty time for days
+     *
+     * @param string $timeType work or dinner
+     *
+     * @return bool
+     */
+    private function isEmptyTimeDays($timeType)
+    {
+        if (is_array($this->value)) {
+            foreach ($this->value as $day) {
+                if (!empty($day[$timeType])) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    /**
      * Register widget assets
      *
      * @return void
@@ -133,11 +173,11 @@ class WorkingDays extends InputWidget
         WorkingDaysAsset::register($this->view);
 
         $options = [
-            'fullDay'      => self::FULL_DAY,
+            'fullDay'      => $this->roundTheClock,
             'enableDinner' => $this->enableDinner,
         ];
 
-        $this->view->registerJs("MPWorkingDays.init();", View::POS_READY, 'MPWorkingDays');
         $this->view->registerJs("MPWorkingDays.addInputSettings('{$this->options['id']}', " . Json::encode($options) . ")");
+        $this->view->registerJs("MPWorkingDays.init(" . Json::encode($options) . ");", View::POS_READY, 'MPWorkingDays');
     }
 }

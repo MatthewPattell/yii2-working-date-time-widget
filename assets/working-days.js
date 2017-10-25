@@ -15,6 +15,102 @@
 var MPWorkingDays = (function (app, $) {
 
     /**
+     * Default settings
+     *
+     * @type {{fullDay: string, enableDinner: boolean}}
+     */
+    let defaultSettings = {};
+
+    /**
+     * Get input setting
+     *
+     * @param {jQuery} widget
+     * @param {string} settingName
+     *
+     * @return {null|string|bool}
+     */
+    let getInputSetting = function (widget, settingName) {
+        return settingName in (widget.data('MPWorkingDaysSettings') || {}) ? widget.data('MPWorkingDaysSettings')[settingName] : defaultSettings[settingName];
+    };
+
+    /**
+     * Automatic filling of time
+     *
+     * @param {jQuery} input Current filling input
+     *
+     * @return {undefined}
+     */
+    let aDaysTime = function (input) {
+        let widget = input.closest('.working-days'),
+            currentOption = input.closest('.option'),
+            inputSelector = '.' + (input.hasClass('time-work') ? 'time-work' : 'time-dinner') + '[data-autofill="1"]',
+            aDays = widget.find(inputSelector);
+
+        if (aDays.length) {
+            let fillingOption = input.closest('.option'),
+                value = input.val();
+
+            $.each(fillingOption.nextAll('.option'), function (i, el) {
+                let option = $(el),
+                    input = option.find(inputSelector);
+
+                if (input.length) {
+                    input.val(value);
+                    app.setInputValue(option);
+                }
+            })
+        }
+    };
+
+    /**
+     * Blur input autofill event
+     *
+     * @param {jQuery.Event} event
+     *
+     * @return {undefined}
+     */
+    let blurAutoFillInput = function (event) {
+        let widget = $(event.target).closest('.working-days'),
+            enableDinner = getInputSetting(widget, 'enableDinner');
+
+        if (!AutoFill.state(widget, '.time-work').isEmpty()) {
+            AutoFill.state(widget, '.time-work').disable();
+        }
+
+        if (enableDinner) {
+            if (!AutoFill.state(widget, '.time-dinner').isEmpty()) {
+                AutoFill.state(widget, '.time-dinner').disable();
+            }
+        }
+    };
+
+    /**
+     * Toggle autofill input state
+     *
+     * @type {{state: state}}
+     */
+    let AutoFill = {
+        state: function (widget, classType) {
+
+            classType = classType !== undefined ? classType : '';
+
+            return {
+                enable: function () {
+                    widget.find(classType + '[data-autofill="-1"]').attr('data-autofill', 1);
+                },
+                disable: function () {
+                    widget.find(classType + '[data-autofill="1"]').attr('data-autofill', -1);
+                },
+                isEmpty: function () {
+                    return widget.find(classType + '[data-autofill="1"]').filter(function () {
+                        return !!this.value;
+                    }).length === 0;
+                },
+            }
+        },
+    };
+
+    /**
      * Add personal input settings
      *
      * @param {string} id
@@ -27,18 +123,6 @@ var MPWorkingDays = (function (app, $) {
     };
 
     /**
-     * Get input setting
-     *
-     * @param {jQuery} element
-     * @param {string} settingName
-     *
-     * @return {null|string|bool}
-     */
-    let getInputSetting = function (element, settingName) {
-        return element.data('MPWorkingDaysSettings')[settingName] !== undefined ? element.data('MPWorkingDaysSettings')[settingName] : null;
-    };
-
-    /**
      * Set input value
      *
      * @param {jQuery} option
@@ -47,10 +131,10 @@ var MPWorkingDays = (function (app, $) {
      * @return {undefined}
      */
     app.setInputValue = function (option, toggle) {
-        let widget = option.closest('.working-days')
+        let widget = option.closest('.working-days'),
             status = option.hasClass('active');
 
-        let fullDay = getInputSetting(widget, 'fullDays'),
+        let fullDay = getInputSetting(widget, 'fullDay'),
             enableDinner = getInputSetting(widget, 'enableDinner');
 
         let inputW = option.find('input.time-work'),
@@ -101,59 +185,111 @@ var MPWorkingDays = (function (app, $) {
             inputW.add(inputD)
                 .removeClass('active')
                 .addClass('inactive');
+
+            option.find('[data-autofill="1"]').attr('data-autofill', -1);
+        }
+
+        // Re enable autofill
+        if (AutoFill.state(widget).isEmpty() && !widget.find('.option.active').length) {
+            AutoFill.state(widget).enable();
         }
     };
 
     /**
      * Re Init module
      *
+     * Example:
+     * {'newId1': {fullDay: ''}, 'newId2': {settings...}} // Set settings only for NEW widgets. (for existing widget use addInputSettings method)
+     * {'id': 'existId'} // Copy previos widget settings
+     * @property {Object} settings
+     *
      * @return {undefined}
      */
-    app.reInit = function () {
+    app.reInit = function (settings) {
 
-        let dayInputs = $('.time-work, .time-dinner');
+        let widgets = $('.working-days');
 
-        $.each(dayInputs, function (i, el) {
-            let timeInput = $(el);
+        $.each(widgets, function (i, el) {
+            let widget = $(el),
+                widgetId = widget.attr('id'),
+                dayInputs = widget.find('.time-work, .time-dinner');
 
-            // Remove inputmask
-            timeInput.inputmask('remove');
+            // Apply settings for new widgets
+            if (widget.data('MPWorkingDaysSettings') === undefined) {
+                let widgetSettings = defaultSettings;
 
-            // Attach inputmask plugin
-            timeInput.inputmask('09.19 - 09.19', {
-                placeholder: "00.00 - 00.00",
-                definitions: {
-                    '0': {
-                        validator: "[0-2]",
-                        cardinality: 1
-                    },
-                    '1': {
-                        validator: "[0-5]",
-                        cardinality: 1
+                if (widgetId in (settings || {})) {
+                    let foundSettings = settings[widgetId];
+
+                    if (typeof foundSettings === 'object') {
+                        widgetSettings = foundSettings;
+                    } else {
+                        let prevoisWidgetSettings = $('#' + foundSettings).data('MPWorkingDaysSettings');
+
+                        if (prevoisWidgetSettings !== undefined) {
+                            widgetSettings = prevoisWidgetSettings;
+                        }
                     }
                 }
-            });
 
-            // Attach keyup event
-            timeInput
-                .off('.MPWorkingDays')
-                .on('keyup.MPWorkingDays', function (e) {
-                    if ((e.keyCode >= 46 && e.keyCode <= 57) || (e.keyCode >= 96 && e.keyCode <= 105) || e.keyCode === 8 || e.keyCode === 13 || e.ctrlKey) {
-                        app.setInputValue($(this).closest('.option'));
+                app.addInputSettings(widgetId, widgetSettings);
+            }
+
+            // Handle inputs
+            $.each(dayInputs, function (i, el) {
+                let timeInput = $(el);
+
+                // Remove inputmask
+                timeInput.inputmask('remove');
+
+                // Attach inputmask plugin
+                timeInput.inputmask('09.19 - 09.19', {
+                    placeholder: "00.00 - 00.00",
+                    definitions: {
+                        '0': {
+                            validator: "[0-2]",
+                            cardinality: 1
+                        },
+                        '1': {
+                            validator: "[0-5]",
+                            cardinality: 1
+                        }
                     }
                 });
 
-            // Attach click event
-            if (timeInput.hasClass('time-work')) {
+                // Attach keyup event
                 timeInput
-                    .closest('div.option')
                     .off('.MPWorkingDays')
-                    .on('click.MPWorkingDays', function (e) {
-                        if (e.target.nodeName === 'DIV') {
-                            app.setInputValue($(this), true);
+                    .on('keyup.MPWorkingDays', function (e) {
+                        if ((e.keyCode >= 46 && e.keyCode <= 57) || (e.keyCode >= 96 && e.keyCode <= 105) || e.keyCode === 8 || e.keyCode === 13 || e.ctrlKey) {
+                            let input = $(this);
+                            option = input.closest('.option');
+
+                            app.setInputValue(option);
+
+                            aDaysTime(input);
                         }
                     });
-            }
+
+                // Attach blur autofill event
+                if (timeInput.data('autofill') !== undefined && timeInput.data('autofill')) {
+                    timeInput
+                        .off('blur', blurAutoFillInput)
+                        .blur(blurAutoFillInput);
+                }
+
+                // Attach click event
+                if (timeInput.hasClass('time-work')) {
+                    timeInput
+                        .closest('div.option')
+                        .off('.MPWorkingDays')
+                        .on('click.MPWorkingDays', function (e) {
+                            if (e.target.nodeName === 'DIV') {
+                                app.setInputValue($(this), true);
+                            }
+                        });
+                }
+            });
         });
     };
 
@@ -165,6 +301,9 @@ var MPWorkingDays = (function (app, $) {
      * @return {undefined}
      */
     app.init = function (options) {
+
+        defaultSettings = $.extend(defaultSettings, options);
+
         app.reInit();
     };
 
