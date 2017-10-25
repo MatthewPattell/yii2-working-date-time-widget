@@ -261,7 +261,7 @@ var MPWorkingDays = (function (app, $) {
 
                 // Attach inputmask plugin
                 timeInput.inputmask('09.19 - 09.19', {
-                    placeholder: "00.00 - 00.00",
+                    placeholder: getInputSetting(widget, 'roundTheClock'),
                     definitions: {
                         '0': {
                             validator: "[0-2]",

@@ -22,12 +22,15 @@ use yii\widgets\InputWidget;
  */
 class WorkingDays extends InputWidget
 {
+    const ROUND_THE_CLOCK_1 = '00.00 - 00.00';
+    const ROUND_THE_CLOCK_2 = '00.00 - 24.00';
+
     /**
      * Round-the-clock value
      *
      * @var string
      */
-    public $roundTheClock = '00.00 - 00.00';
+    public $roundTheClock;
 
     /**
      * Enable dinner input
@@ -60,6 +63,10 @@ class WorkingDays extends InputWidget
      */
     public function init()
     {
+        if (empty($this->roundTheClock)) {
+            $this->roundTheClock = self::ROUND_THE_CLOCK_2;
+        }
+
         if (empty($this->options['id'])) {
             $this->options['id'] = $this->getId();
         }
@@ -90,7 +97,7 @@ class WorkingDays extends InputWidget
         $input = Html::beginTag('div', ['id' => $this->options['id'], 'class' => 'working-days']);
 
         foreach ($days as $dayAlias => $dayTitle) {
-            $day_status   = empty($this->value[$dayAlias]['work']) && empty($this->value[$dayAlias]['dinner']) ? 'inactive' : 'active';
+            $day_status = empty($this->value[$dayAlias]['work']) && empty($this->value[$dayAlias]['dinner']) ? 'inactive' : 'active';
 
             $input .= Html::beginTag('div', ['class' => 'option ' . $day_status]);
             $input .= Html::beginTag('div', ['class' => 'option-row']);
@@ -224,8 +231,9 @@ class WorkingDays extends InputWidget
         WorkingDaysAsset::register($this->view);
 
         $options = [
-            'fullDay'      => $this->roundTheClock,
-            'enableDinner' => $this->enableDinner,
+            'fullDay'       => $this->roundTheClock,
+            'enableDinner'  => $this->enableDinner,
+            'roundTheClock' => $this->roundTheClock,
         ];
 
         $this->view->registerJs("MPWorkingDays.addInputSettings('{$this->options['id']}', " . Json::encode($options) . ")");
