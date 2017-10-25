@@ -33,6 +33,20 @@ Once the extension is installed, simply use it in your code by:
 <?= \MP\WorkingDatetime\WorkingDays::widget(['name' => 'example']); ?>
 ```
 
+**Options:**
+```php
+WorkingDays::widget([
+    'name' => 'example',
+    
+    'roundTheClock' => '00.00 - 00.00', // Default - 00.00 - 00.00. Round-The-Clock value
+    'enableDinner' => true,             // Default - true. Enable/disable dinner input
+    
+    'autocompleteDays' => [],           // Default - []. Automatic filling of time for the specified days
+                                        // Example: [1,2,5] or ['monday', 'friday']
+                                        // Warning: FILLS TIME FROM THE FILLED DAY
+])
+```
+
 If you dynamic add widget to page, run (js):
 ```js
 MPWorkingDays.reInit(); // Set default settings only for NEW widgets
@@ -46,16 +60,7 @@ or
 MPWorkingDays.reInit({newId: {settings...}}); // Set new widget settings
 ```
 
-**Options:**
-```php
-WorkingDays::widget([
-    'name' => 'example',
-    
-    'roundTheClock' => '00.00 - 00.00', // Default - 00.00 - 00.00. Round-The-Clock value
-    'enableDinner' => true,             // Default - true. Enable/disable dinner input
-    
-    'autocompleteDays' => [],           // Default - []. Automatic filling of time for the specified days
-                                        // Example: [1,2,5] or ['monday', 'friday']
-                                        // Warning: FILLS TIME FROM THE FILLED DAY
-])
+Set dynamicaly widget settings:
+```js
+MPWorkingDays.addInputSettings(widgetID, {settings...});
 ```

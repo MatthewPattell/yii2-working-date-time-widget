@@ -189,6 +189,23 @@ var MPWorkingDays = (function (app, $) {
             option.find('[data-autofill="1"]').attr('data-autofill', -1);
         }
 
+        // Change placeholder
+        if (status !== option.hasClass('active')) {
+            let placeholder = inputW.attr('placeholder');
+
+            inputW
+                .attr('placeholder', inputW.data('placeholder'))
+                .data('placeholder', placeholder);
+
+            if (enableDinner) {
+                let placeholder = inputD.attr('placeholder');
+
+                inputD
+                    .attr('placeholder', inputD.data('placeholder'))
+                    .data('placeholder', placeholder);
+            }
+        }
+
         // Re enable autofill
         if (AutoFill.state(widget).isEmpty() && !widget.find('.option.active').length) {
             AutoFill.state(widget).enable();
