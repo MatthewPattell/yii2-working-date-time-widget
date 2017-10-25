@@ -92,31 +92,30 @@ class WorkingDays extends InputWidget
             $inputName = $this->name;
         }
 
-        $days = $this->getDays();
-
-        $input = Html::beginTag('div', ['id' => $this->options['id'], 'class' => 'working-days']);
+        $days  = $this->getDays();
+        $input = NULL;
 
         foreach ($days as $dayAlias => $dayTitle) {
             $day_status = empty($this->value[$dayAlias]['work']) && empty($this->value[$dayAlias]['dinner']) ? 'inactive' : 'active';
+
+            $inputs = $this->getWorkingDayInput($inputName, $dayAlias)
+                . ($this->enableDinner ? $this->getDinnerDayInput($inputName, $dayAlias) : NULL);
 
             $input .= Html::beginTag('div', ['class' => 'option ' . $day_status]);
             $input .= Html::beginTag('div', ['class' => 'option-row']);
 
             $input .= Html::tag('div', $dayTitle, ['class' => 'name', 'title' => Yii::t('app', 'Нажмите, чтобы активировать')]);
-            $input .= Html::beginTag('div', ['class' => 'value']);
+            $input .= Html::tag('div', $inputs, ['class' => 'value']);
 
-            $input .= $this->getWorkingDayInput($inputName, $dayAlias);
-
-            if ($this->enableDinner) {
-                $input .= $this->getDinnerDayInput($inputName, $dayAlias);
-            }
-
-            $input .= Html::endTag('div');
             $input .= Html::endTag('div');
             $input .= Html::endTag('div');
         }
 
-        $input .= Html::endTag('div');
+        if ($this->hasModel()) {
+            $input .= Html::tag('span', NULL, ['id' => Html::getInputId($this->model, $this->attribute)]);
+        }
+
+        $input = Html::tag('div', $input, ['id' => $this->options['id'], 'class' => 'working-days']);
 
         return $input;
     }

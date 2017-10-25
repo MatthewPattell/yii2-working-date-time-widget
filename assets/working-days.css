@@ -21,6 +21,10 @@
     box-shadow: 0 1px 2px rgba(160,160,160,1);
 }
 
+.working-days > span[id] {
+    display: none;
+}
+
 .working-days .option-row {
     -webkit-user-select: none;
     -moz-user-select: none;
@@ -73,4 +77,12 @@
 .working-days .time-work.inactive:focus,
 .working-days .time-dinner.inactive:focus {
     font-size: 14px;
+}
+
+.has-error .working-days .form-control {
+    border-color: #ccc;
+}
+
+.has-success .working-days .form-control {
+    border-color: #ccc;
 }

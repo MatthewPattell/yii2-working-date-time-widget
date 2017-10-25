@@ -36,6 +36,7 @@ class WorkingDaysAsset extends AssetBundle
      * @var array
      */
     public $depends = [
+        'yii\web\YiiAsset',
         'yii\web\JqueryAsset',
         'yii\widgets\MaskedInputAsset',
     ];

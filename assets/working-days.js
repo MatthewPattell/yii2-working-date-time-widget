@@ -327,3 +327,20 @@ var MPWorkingDays = (function (app, $) {
     return app;
 
 }(MPWorkingDays || {}, jQuery));
+
+/**
+ * Yii2 client side required validator for working days
+ *
+ * @author Yarmaliuk Mikhail
+ */
+yii.validation.requiredWorkingDays = function (attribute, messages, options) {
+    let widget = $('input[name^="' + options.inputName + '"]').closest('.working-days');
+
+    let isEmpty = widget.find('.realW, .realD').filter(function () {
+        return !!this.value;
+    }).length === 0;
+
+    if (isEmpty) {
+        yii.validation.addMessage(messages, options.requiredMessage);
+    }
+};
