@@ -260,18 +260,58 @@ var MPWorkingDays = (function (app, $) {
                 timeInput.inputmask('remove');
 
                 // Attach inputmask plugin
-                timeInput.inputmask('09.19 - 09.19', {
+                timeInput.inputmask('01.29 - 01.29', {
                     placeholder: getInputSetting(widget, 'roundTheClock'),
+                    //colorMask: true,
+                    insertMode: false,
                     definitions: {
                         '0': {
-                            validator: "[0-2]",
-                            cardinality: 1
+                            validator: function (chrs, mask, pos) {
+                                if (chrs < 0) {
+                                    return false;
+                                } else if (chrs > 2 && chrs < 10) {
+                                    return {caret: pos + 3, pos: pos + 1};
+                                }
+
+                                let nextSymbol = mask.buffer[pos + 1] !== undefined ? mask.buffer[pos + 1] : null;
+
+                                if (nextSymbol !== null) {
+                                    if (chrs > 1 && nextSymbol > 4) {
+                                        return false;
+                                    }
+                                }
+
+                                return true;
+                            },
                         },
                         '1': {
+                            validator: function (chrs, mask, pos) {
+                                if (mask.buffer[pos - 1]) {
+                                    switch (mask.buffer[pos - 1]) {
+                                        case '0':
+                                        case '1':
+                                            return chrs >= 0 && chrs <= 9;
+                                            break;
+
+                                        case '2':
+                                            return chrs >= 0 && chrs <= 4;
+                                            break;
+                                    }
+                                }
+
+                                return false;
+                            },
+                        },
+                        '2': {
                             validator: "[0-5]",
-                            cardinality: 1
+                            cardinality: 1,
+                        },
+                    },
+                    onBeforeWrite: function (e, buffer, caretPos) {
+                        if (e.keyCode === 8 || e.keyCode === 46) {
+                            return {caret: caretPos - 1};
                         }
-                    }
+                    },
                 });
 
                 // Attach keyup event
